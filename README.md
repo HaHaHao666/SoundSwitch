@@ -16,6 +16,9 @@ This project is a fork of SoundSwitch by [pekand](https://github.com/pekand/Soun
   - Enable or disable "Run at startup"
 - 🔄 **Real-time Volume Sync** — The volume bar now automatically reflects changes made through the system mixer, keyboard volume knobs, or other applications (event-driven, zero polling overhead).
 - 🔽 **Minimize to System Tray** — When minimized, the app hides to the system tray with a notification icon. Right-click the tray icon for **Setting** and **Exit**. Double-click to restore the window.
+- **It's still an ultra-lite app.** 🥳
+<img width="373" height="469" alt="image" src="https://github.com/user-attachments/assets/3a57a7a5-35c2-43b4-8e7b-82ba00bd1366" />
+
 
 ![Screenshot of SoundSwitch UI](images/SoundSwitch.png)
 
