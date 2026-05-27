@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 
 namespace SoundSwitch
@@ -10,6 +11,15 @@ namespace SoundSwitch
         private MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
         private MMDeviceCollection devices;
         private MMDevice selectedDevice;
+
+        [DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        private const int HOTKEY_ID = 9000;
+        private const int WM_HOTKEY = 0x0312;
 
         private bool isDragging = false;
 
@@ -92,6 +102,8 @@ namespace SoundSwitch
             topPos = this.Top;
 
             comboBox1.SelectedIndexChanged += ComboBox1_SelectedIndexChanged;
+
+            vc.VolumeChanged += OnSystemVolumeChanged;
         }
 
         // PREVENT MAXIMALIZE
@@ -99,11 +111,109 @@ namespace SoundSwitch
         {
             const int WM_SYSCOMMAND = 0x0112;
             const int SC_MAXIMIZE = 0xF030;
+            const int SC_MINIMIZE = 0xF020;
 
             if (m.Msg == WM_SYSCOMMAND && (m.WParam.ToInt32() == SC_MAXIMIZE))
-                return; // ignore maximize command
+                return;
+
+            if (m.Msg == WM_SYSCOMMAND && (m.WParam.ToInt32() == SC_MINIMIZE))
+            {
+                MinimizeToTray();
+                return;
+            }
+
+            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == HOTKEY_ID)
+            {
+                CycleToNextDevice();
+                return;
+            }
 
             base.WndProc(ref m);
+        }
+
+        // MINIMIZE TO SYSTEM TRAY
+        private void MinimizeToTray()
+        {
+            this.Hide();
+            notifyIcon.Visible = true;
+        }
+
+        // RESTORE FROM SYSTEM TRAY
+        private void RestoreFromTray()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.Activate();
+            notifyIcon.Visible = false;
+        }
+
+        // TRAY ICON DOUBLE CLICK
+        private void notifyIcon_DoubleClick(object sender, EventArgs e)
+        {
+            RestoreFromTray();
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            RegisterConfiguredHotkey();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            UnregisterHotKey(this.Handle, HOTKEY_ID);
+            base.OnHandleDestroyed(e);
+        }
+
+        private void RegisterConfiguredHotkey()
+        {
+            UnregisterHotKey(this.Handle, HOTKEY_ID);
+
+            if (data.ContainsKey("HotkeyKey") && data.ContainsKey("HotkeyModifiers"))
+            {
+                uint mod = uint.Parse(data["HotkeyModifiers"]);
+                uint key = uint.Parse(data["HotkeyKey"]);
+                if (key != 0)
+                {
+                    bool success = RegisterHotKey(this.Handle, HOTKEY_ID, mod, key);
+                    if (!success)
+                    {
+                        MessageBox.Show("Failed to register hotkey. It may be in use by another application.",
+                            "Hotkey Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+        }
+
+        private void CycleToNextDevice()
+        {
+            if (!data.ContainsKey("SelectedDevices") || string.IsNullOrEmpty(data["SelectedDevices"]))
+                return;
+
+            string[] cycleDeviceIds = data["SelectedDevices"].Split(',');
+            if (cycleDeviceIds.Length < 2) return;
+
+            var currentDefault = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            string currentId = currentDefault.ID;
+
+            int currentIndex = Array.IndexOf(cycleDeviceIds, currentId);
+
+            for (int attempt = 0; attempt < cycleDeviceIds.Length; attempt++)
+            {
+                int tryIndex = (currentIndex + 1 + attempt) % cycleDeviceIds.Length;
+                try
+                {
+                    AudioDeviceSwitcher.SetDefaultDevice(cycleDeviceIds[tryIndex]);
+                    vc.SetCurrentDevice();
+                    LoadAudioDevices();
+                    instantProgressBar1.Value = vc.GetVolume();
+                    break;
+                }
+                catch
+                {
+                    continue;
+                }
+            }
         }
 
         //EVENT LOAD FORM
@@ -180,8 +290,11 @@ namespace SoundSwitch
         // EVENT FORM CLOSING
         private void FormSoundSwitch_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
+            notifyIcon.Visible = false;
+
+            if (this.WindowState == FormWindowState.Minimized || !this.Visible)
             {
+                this.Show();
                 this.WindowState = FormWindowState.Normal;
             }
 
@@ -308,6 +421,16 @@ namespace SoundSwitch
             vc.SetVolume(value);
         }
 
+        // VOLUME SYNC FROM SYSTEM
+        private void OnSystemVolumeChanged(int volume)
+        {
+            if (isDragging) return;
+            if (IsHandleCreated)
+            {
+                BeginInvoke(() => instantProgressBar1.Value = volume);
+            }
+        }
+
         // VOLUME PROGRESSBAR UPDATE
         private void instantProgressBar1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -412,7 +535,19 @@ namespace SoundSwitch
         {
             this.Opacity = (this.Opacity == 1) ? defaultOpacity : 1;
             oppacityToolStripMenuItem.Checked = (this.Opacity == defaultOpacity);
+        }
 
+        // SETTINGS BUTTON
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            using (var settingsForm = new FormSettings(data, this))
+            {
+                if (settingsForm.ShowDialog(this) == DialogResult.OK)
+                {
+                    RegisterConfiguredHotkey();
+                    SaveData();
+                }
+            }
         }
     }
 }

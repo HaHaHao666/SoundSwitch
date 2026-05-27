@@ -31,6 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormSoundSwitch));
             comboBox1 = new ComboBox();
+            btnSettings = new Button();
             contextMenuStrip = new ContextMenuStrip(components);
             optionsToolStripMenuItem = new ToolStripMenuItem();
             mostTopToolStripMenuItem = new ToolStripMenuItem();
@@ -39,7 +40,12 @@
             oppacityToolStripMenuItem = new ToolStripMenuItem();
             closeToolStripMenuItem = new ToolStripMenuItem();
             instantProgressBar1 = new InstantProgressBar();
+            notifyIcon = new NotifyIcon(components);
+            trayContextMenuStrip = new ContextMenuStrip(components);
+            traySettingToolStripMenuItem = new ToolStripMenuItem();
+            trayCloseToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip.SuspendLayout();
+            trayContextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
             // comboBox1
@@ -50,9 +56,21 @@
             comboBox1.FormattingEnabled = true;
             comboBox1.Location = new Point(12, 12);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(282, 29);
+            comboBox1.Size = new Size(218, 29);
             comboBox1.TabIndex = 0;
-            // 
+            //
+            // btnSettings
+            //
+            btnSettings.ContextMenuStrip = contextMenuStrip;
+            btnSettings.Font = new Font("Segoe UI", 9F);
+            btnSettings.Location = new Point(234, 12);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Size = new Size(60, 29);
+            btnSettings.TabIndex = 2;
+            btnSettings.Text = "Setting";
+            btnSettings.UseVisualStyleBackColor = true;
+            btnSettings.Click += btnSettings_Click;
+            //
             // contextMenuStrip
             // 
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem, closeToolStripMenuItem });
@@ -115,14 +133,43 @@
             instantProgressBar1.MouseDown += instantProgressBar1_MouseDown;
             instantProgressBar1.MouseMove += instantProgressBar1_MouseMove;
             instantProgressBar1.MouseUp += instantProgressBar1_MouseUp;
-            // 
+            //
+            // notifyIcon
+            //
+            notifyIcon.Icon = (Icon)resources.GetObject("$this.Icon");
+            notifyIcon.Text = "SoundSwitch";
+            notifyIcon.ContextMenuStrip = trayContextMenuStrip;
+            notifyIcon.Visible = false;
+            notifyIcon.DoubleClick += notifyIcon_DoubleClick;
+            //
+            // trayContextMenuStrip
+            //
+            trayContextMenuStrip.Items.AddRange(new ToolStripItem[] { traySettingToolStripMenuItem, trayCloseToolStripMenuItem });
+            trayContextMenuStrip.Name = "trayContextMenuStrip";
+            trayContextMenuStrip.Size = new Size(120, 52);
+            //
+            // traySettingToolStripMenuItem
+            //
+            traySettingToolStripMenuItem.Name = "traySettingToolStripMenuItem";
+            traySettingToolStripMenuItem.Size = new Size(119, 24);
+            traySettingToolStripMenuItem.Text = "Setting";
+            traySettingToolStripMenuItem.Click += btnSettings_Click;
+            //
+            // trayCloseToolStripMenuItem
+            //
+            trayCloseToolStripMenuItem.Name = "trayCloseToolStripMenuItem";
+            trayCloseToolStripMenuItem.Size = new Size(119, 24);
+            trayCloseToolStripMenuItem.Text = "Exit";
+            trayCloseToolStripMenuItem.Click += closeToolStripMenuItem_Click;
+            //
             // FormSoundSwitch
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(305, 83);
             ContextMenuStrip = contextMenuStrip;
             Controls.Add(instantProgressBar1);
+            Controls.Add(btnSettings);
             Controls.Add(comboBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -135,6 +182,7 @@
             FormClosing += FormSoundSwitch_FormClosing;
             Load += FormSoundSwitch_Load;
             contextMenuStrip.ResumeLayout(false);
+            trayContextMenuStrip.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -149,5 +197,10 @@
         private ToolStripMenuItem autorunToolStripMenuItem;
         private ToolStripMenuItem showInTaskbarToolStripMenuItem;
         private ToolStripMenuItem oppacityToolStripMenuItem;
+        private Button btnSettings;
+        private NotifyIcon notifyIcon;
+        private ContextMenuStrip trayContextMenuStrip;
+        private ToolStripMenuItem traySettingToolStripMenuItem;
+        private ToolStripMenuItem trayCloseToolStripMenuItem;
     }
 }
