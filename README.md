@@ -4,7 +4,7 @@ A simple and efficient widget for Windows 11 that lets you **quickly switch betw
 
 ## 📋 Changelog
 
-### v1.0.2
+### v1.1.0
 
 This project is a fork of SoundSwitch by [pekand](https://github.com/pekand/SoundSwitch), modified in May 2026 by HaHaHao666. Sincere thanks to the original author for the excellent foundation this work builds upon. This fork is released under the same GPL-3.0 License as the original.
 
