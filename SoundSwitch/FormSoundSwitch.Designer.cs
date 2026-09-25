@@ -139,7 +139,7 @@
             notifyIcon.Icon = (Icon)resources.GetObject("$this.Icon");
             notifyIcon.Text = "SoundSwitch";
             notifyIcon.ContextMenuStrip = trayContextMenuStrip;
-            notifyIcon.Visible = false;
+            notifyIcon.Visible = true;
             notifyIcon.DoubleClick += notifyIcon_DoubleClick;
             //
             // trayContextMenuStrip

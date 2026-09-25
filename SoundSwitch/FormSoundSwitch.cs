@@ -136,7 +136,6 @@ namespace SoundSwitch
         private void MinimizeToTray()
         {
             this.Hide();
-            notifyIcon.Visible = true;
         }
 
         // RESTORE FROM SYSTEM TRAY
@@ -145,7 +144,6 @@ namespace SoundSwitch
             this.Show();
             this.WindowState = FormWindowState.Normal;
             this.Activate();
-            notifyIcon.Visible = false;
         }
 
         // TRAY ICON DOUBLE CLICK
