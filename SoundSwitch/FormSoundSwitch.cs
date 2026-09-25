@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using NAudio.CoreAudioApi;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace SoundSwitch
@@ -319,7 +320,16 @@ namespace SoundSwitch
             if (!File.Exists(path))
                 return;
 
-            var root = XElement.Load(path);
+            XElement root;
+            try
+            {
+                root = XElement.Load(path);
+            }
+            catch (XmlException)
+            {
+                // Empty or corrupted file, fall back to defaults
+                return;
+            }
 
             foreach (var entry in root.Elements("item"))
             {
@@ -351,7 +361,10 @@ namespace SoundSwitch
                 root.Add(entry);
             }
 
-            root.Save(path);
+            // Write to a temp file first so an interrupted save cannot leave an empty options.xml
+            string tempPath = path + ".tmp";
+            root.Save(tempPath);
+            File.Move(tempPath, path, true);
         }
 
         // AUDIO DEVICES LIST
