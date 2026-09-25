@@ -10,12 +10,13 @@
     <ApplicationIcon>SoundSwitch.ico</ApplicationIcon>
 
     <Product>SoundSwitchWidget</Product>
-    <AssemblyVersion>$([System.IO.File]::ReadAllText('..\version.txt').Trim())</AssemblyVersion>
+    <AssemblyVersion>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\version.txt').Trim())</AssemblyVersion>
     <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>    
     <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <InformationalVersion>$(AssemblyVersion)</InformationalVersion>
-    <Copyright>© 2025 Built on $(BuildDate)</Copyright>
+    <Company>HaHaHao666</Company>
+    <Copyright>© 2025 Pekar Andrej, © 2026 HaHaHao666</Copyright>
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
