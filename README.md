@@ -4,6 +4,11 @@ A simple and efficient widget for Windows 11 that lets you **quickly switch betw
 
 ## 📋 Changelog
 
+### v1.1.2
+
+- 🐛 **Fixed duplicate startup entries** — Upgrading to a new version no longer adds another "Run at startup" entry. Two copies starting at boot caused a "Failed to register hotkey" error. Entries left by v1.1.0 – v1.1.1 are cleaned up automatically on first launch.
+- 🔒 **Single instance** — Launching SoundSwitch while it is already running no longer starts a second copy.
+
 ### v1.1.1
 
 - 🔔 **Always-visible Tray Icon** — The system tray icon is now shown at all times, not only when minimized. Double-click it to bring the window to the front, or right-click for **Setting** and **Exit**.
