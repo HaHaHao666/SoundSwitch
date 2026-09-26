@@ -29,7 +29,10 @@ namespace SoundSwitch
         private Dictionary<string, string> data = new Dictionary<string, string>();
 
         private const string AutorunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-        private static string AppName => Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName);
+        // Fixed name so the autorun entry is replaced (not duplicated) when the exe is renamed or updated
+        private const string AppName = "SoundSwitch";
+        // v1.1.0 - v1.1.1 named the autorun entry after the versioned exe file
+        private const string LegacyAutorunPrefix = "SoundSwitchWidget-v";
 
         public float defaultOpacity = 0.7F;
 
@@ -57,6 +60,7 @@ namespace SoundSwitch
             instantProgressBar1.Value = vc.GetVolume();
 
             LoadData();
+            MigrateLegacyAutorun();
 
             if (data.ContainsKey("TopMost"))
             {
@@ -490,6 +494,31 @@ namespace SoundSwitch
             {
                 key.DeleteValue(AppName, false);
             }
+        }
+
+        // AUTORUN
+        // Replace autorun entries created by older versions with the fixed AppName entry
+        private void MigrateLegacyAutorun()
+        {
+            bool found = false;
+
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(AutorunKeyPath, true))
+            {
+                if (key == null)
+                    return;
+
+                foreach (string name in key.GetValueNames())
+                {
+                    if (name.StartsWith(LegacyAutorunPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        key.DeleteValue(name, false);
+                        found = true;
+                    }
+                }
+            }
+
+            if (found)
+                this.AddToAutorun();
         }
 
         // AUTORUN
